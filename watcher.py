@@ -3,13 +3,18 @@ import json
 import urllib3
 import time
 
+from hidtest import send_raw_report
+
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)#guh, I dont wanna see these warnings anymore :]
 
-api_key = "RGAPI-45822d7d-e4cd-4392-a3c0-28633d7248d3" #update daily, may be needed for future add-ons, found at https://developer.riotgames.com
+
+
+api_key = "RGAPI-9531a98b-420e-41ad-b738-d273447831f7" #update daily, may be needed for future add-ons, found at https://developer.riotgames.com
 
 #update these two to your own if you want to run non-local PUUID paths
-name = 'adduB'
-tagline = 'NA1'
+name = 'zSuper'
+tagline = 'SKZ'
 
 account_url = "https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + name + '/' + tagline + '/'
 mastery_url = "https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/" #for testing PUUID
@@ -42,6 +47,9 @@ while True: #Pings every second in champ select, breaks once player selects cham
         else:
             print(selected_champ.json())
             id = selected_champ.json() #champ id when champ is selected
+            send_raw_report(
+                "X255000255000255000"
+            )
             break
     except Exception as e: #ignore if not in champ select yet
         print(-1)

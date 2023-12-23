@@ -60,7 +60,7 @@ def generate_num():
     return string
 
 async def randomcolors():
-    for _ in range(50):
+    for _ in range(10):
         to_send = "X"
         for _ in range(6):
             to_send += generate_num()
@@ -83,42 +83,43 @@ async def flash_red():
         await asyncio.sleep(0.1)
 
 async def main():
-    inp = input("Enter 'Random' or 2 RGB values: ")
+    while(True):
+        inp = input("Enter 'Random' or 2 RGB values: ")
 
-
-    if(inp.strip().upper() == 'RANDOM'):
-        await randomcolors()
-        return 1
-    elif(inp.strip().upper() == 'N'):
-        send_raw_report(
-            'N'
-        )
-        exit(0)
-    elif(inp.strip().upper() == 'RED'):
-        await flash_red()
-        exit(0)
-    nums = inp.split(' ')
-
-    raw_input = "X"
-    print()
-    if(len(nums) != 6):
-        print("Enter 6 numbers: R1 G1 B1 R2 G2 B2")
-        exit(1)
-    for num in nums:
-        try:
-            curr = int(num)
-            if(curr < 0 or 255 < curr or len(num) != 3):
-                print("Numbers should be between 000 & 255 and be 3 digits.")
-                exit(1)
-            raw_input += num
-        except Exception as e:
-            print("Enter only numbers!")
-            exit(1)
-    # print(raw_input)
-    send_raw_report(
-        raw_input
-    )
+        if(inp.strip().upper() == 'RANDOM'):
+            await randomcolors()
+            continue
+        elif(inp.strip().upper() == 'N'):
+            send_raw_report(
+                'N'
+            )
+            continue
+        elif(inp.strip().upper() == 'RED'):
+            await flash_red()
+            continue
         
+        nums = inp.split(' ')
+
+        raw_input = "X"
+        print()
+        if(len(nums) != 6):
+            print("Enter 6 numbers: R1 G1 B1 R2 G2 B2")
+            continue
+        for num in nums:
+            try:
+                curr = int(num)
+                if(curr < 0 or 255 < curr or len(num) != 3):
+                    print("Numbers should be between 000 & 255 and be 3 digits.")
+                    exit(1)
+                raw_input += num
+            except Exception as e:
+                print("Enter only numbers!")
+                exit(1)
+        print(raw_input)
+        send_raw_report(
+            raw_input
+        )
+            
 
 
 
