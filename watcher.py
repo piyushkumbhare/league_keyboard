@@ -3,7 +3,7 @@ import json
 import urllib3
 import time
 
-from hidtest import send_raw_report
+import champ_animations
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)#guh, I dont wanna see these warnings anymore :]
@@ -47,9 +47,6 @@ while True: #Pings every second in champ select, breaks once player selects cham
         else:
             print(selected_champ.json())
             id = selected_champ.json() #champ id when champ is selected
-            send_raw_report(
-                "X255000255000255000"
-            )
             break
     except Exception as e: #ignore if not in champ select yet
         print(-1)

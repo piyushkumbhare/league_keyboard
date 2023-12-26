@@ -1,95 +1,29 @@
-import random
-import sys
 import asyncio
 
-import hid
-import numpy as np
+from hid_functions import *
 
-# QMK Constants - used to identify device when enumerating devices.
-USAGE_PAGE = 0xFF60
-USAGE = 0x61
 RAW_EPSIZE = 32 # All data reports have 33 bytes: 0th byte is for the Report ID, leaving 32 bytes of payload data.
-RGB_MATRIX_LED_COUNT = 87
-
-# ID Constants
-VENDOR_ID     = 0x3434
-PRODUCT_ID    = 0x0121
+RGB_MATRIX_LED_COUNT = 87 # The Keychron Q3 has 87 RGB keys in its RGB Matrix (the encoder knob counts as a keycode but NOT an RGB light)
 
 
-(
-    KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,     KC_MUTE,  KC_PSCR,  KC_NO,    RGB_MOD,
+
+(                                                                                           
+    KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,               KC_PSCR,  KC_NO,    RGB_MOD,
     KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,     KC_BSPC,  KC_INS,   KC_HOME,  KC_PGUP,
     KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,    KC_BSLS,  KC_DEL,   KC_END,   KC_PGDN,
     KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,              KC_ENT,
     KC_LSFT,            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,              KC_RSFT,            KC_UP,
     KC_LCTL,  KC_LWIN,  KC_LALT,                                KC_SPC,                                 KC_RALT,  KC_RWIN,  KC_FN,      KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT
-) = range(0, 88)
+) = range(RGB_MATRIX_LED_COUNT)
 
 
 def generate_keymap(regions: list[set[int]]):
-    pass
-
-
-
-
-
-def get_raw_hid_interface(vendor_id: int, product_id: int):
-    device_interfaces = hid.enumerate(vendor_id, product_id)
-    raw_hid_interfaces = [i for i in device_interfaces if i['usage_page'] == USAGE_PAGE and i['usage'] == USAGE]
-
-    if len(raw_hid_interfaces) == 0:
-        return None
-
-    interface = hid.Device(path=raw_hid_interfaces[0]['path'])
-
-    return interface
-
-
-
-
-
-def send_raw_report(payload: list[int]):
-    interface = get_raw_hid_interface(VENDOR_ID, PRODUCT_ID)
-
-    if(interface is None):
-        print("ERROR: No device found")
-        sys.exit(1)
-
-    report = [0x00, *payload]
-    # print(report)
-
-
-    try:
-        report_bytes = bytes(report)
-        interface.write(report_bytes)
-
-    finally:
-        interface.close()
-
-
-
-
-
-def send_group_report(payloads: list[list[int]]):
-    interface = get_raw_hid_interface(VENDOR_ID, PRODUCT_ID)
-
-    if(interface is None):
-        print("ERROR: No device found")
-        sys.exit(1)
-        
-    try:
-        for payload in payloads:
-            report = [0x00, *payload]
-            # print(report)
-            
-            report_bytes = bytes(report)
-            interface.write(report_bytes)
+    keymap = [0x00] * RGB_MATRIX_LED_COUNT
+    for region, keys in enumerate(regions):
+        for key in keys:
+            keymap[key] = region
     
-    finally:
-        interface.close()
-
-
-
+    return keymap
 
 
 def toggle_custom_colors(state: bool):
@@ -161,7 +95,22 @@ def write_keymap(keymap: list[int]):
     send_group_report(payloads)
 
 async def main():
-    generate_keymap(())
+
+    keymap = [0x00] * RGB_MATRIX_LED_COUNT
+
+    for i in range(RGB_MATRIX_LED_COUNT):
+        keymap[i] = i % 3
+
+    colors = [
+        [0, 255, 000, 000],
+        [1, 255, 50, 000],
+        [2, 255, 100, 000]
+    ]
+
+    write_keymap(keymap)
+
+    set_region_colors(colors)
+
 
 if __name__ == '__main__':
     asyncio.run(main())
